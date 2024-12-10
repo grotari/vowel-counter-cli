@@ -6,12 +6,14 @@ from my_project.vowel_counter import count_vowels
 def main():
     parser = argparse.ArgumentParser(
         description="Count vowels in a given string or file.",
-        epilog="Usage examples:\n"
-        "  python cli.py 'Sample Text'\n"
-        "  python cli.py -f sample.txt\n"
-        "  python cli.py 'Sample Text' -c\n"
-        "  python cli.py -f sample.txt -v\n"
-        "  python cli.py -f sample.txt -vv -c",
+        epilog=(
+            "Usage examples:\n"
+            "  python cli.py 'Sample Text'\n"
+            "  python cli.py -f sample.txt\n"
+            "  python cli.py 'Sample Text' -c\n"
+            "  python cli.py -f sample.txt -v\n"
+            "  python cli.py -f sample.txt -vv -c"
+        ),
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
@@ -41,8 +43,8 @@ def main():
     parser.add_argument(
         "--vowels",
         type=str,
-        help="Custom set of vowels to count (default: 'aeiou')",
         default="aeiou",
+        help="Custom set of vowels to count (default: 'aeiou').",
     )
 
     parser.add_argument(
@@ -62,38 +64,26 @@ def main():
 
     args = parser.parse_args()
 
-    # Validate vowels argument
-    if not args.vowels or not isinstance(args.vowels, str):
-        print("Error: Vowels must be a non-empty string.")
-        return
-
-    # Validate file input
-    if args.file and not args.file.endswith(".txt"):
-        print("Error: Only .txt files are supported.")
-        return
-
-    # Validate chunk_size argument
-    if args.chunk_size <= 0:
-        print("Error: Chunk size must be a positive integer.")
-        return
-
     # Handle input: either string or file content
     input_string = None
     if args.file:
+        if not os.path.isfile(args.file):
+            print(f"Error: File '{os.path.abspath(args.file)}' not found.")
+            return
+        if not args.file.endswith(".txt"):
+            print(f"Error: Unsupported file format. Only '.txt' files are supported.")
+            return
         try:
             with open(args.file, "r", encoding="utf-8") as file:
                 input_string = file.read().strip()
         except UnicodeDecodeError:
             print(f"Error: Could not decode file '{args.file}' using UTF-8 encoding.")
             return
-        except FileNotFoundError:
-            print(f"Error: File '{os.path.abspath(args.file)}' not found.")
-            return
     else:
         input_string = args.string
 
     # Validate input content
-    if input_string is None or input_string.strip() == "":
+    if not input_string:
         source = (
             f"File '{os.path.abspath(args.file)}'" if args.file else "Provided string"
         )
@@ -102,6 +92,15 @@ def main():
 
     if not isinstance(input_string, str):
         print("Error: Input must be a string.")
+        return
+
+    # Validate arguments
+    if not args.vowels or not isinstance(args.vowels, str):
+        print("Error: Vowels must be a non-empty string.")
+        return
+
+    if args.chunk_size <= 0:
+        print("Error: Chunk size must be a positive integer.")
         return
 
     # Perform vowel counting
@@ -118,16 +117,13 @@ def main():
 
     # Handle verbose output
     if args.verbose >= 2:
-        # Extra detailed output
         source = os.path.abspath(args.file) if args.file else "Provided string input"
         print(f"Analyzing: {source}")
         print(f"Input: {input_string}")
         print(f"Vowel count: {result}")
     elif args.verbose == 1:
-        # Standard verbose output
         print(f"Vowel count: {result}")
     else:
-        # Minimal output
         print(result)
 
 

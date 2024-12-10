@@ -24,12 +24,11 @@ def count_vowels(
     if not isinstance(chunk_size, int) or chunk_size <= 0:
         raise ValueError("Chunk size must be a positive integer.")
 
-    vowels_set = set(vowels)
-
     if not case_sensitive:
         input_string = input_string.lower()
-        vowels_set = set(vowel.lower() for vowel in vowels_set)
+        vowels = vowels.lower()
 
+    vowels_set = set(vowels)
     total_vowels = 0
 
     for i in range(0, len(input_string), chunk_size):
